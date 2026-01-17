@@ -1,0 +1,105 @@
+@VideoGameExchange.Server_HostAddress = http://localhost:5000
+@userId = 
+@gameId = 
+@authToken = 
+
+### AUTHENTICATION - Login to get JWT token
+POST {{VideoGameExchange.Server_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "securepassword123"
+}
+
+### Create a new user (No auth required)
+POST {{VideoGameExchange.Server_HostAddress}}/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "password": "securepassword123",
+  "email": "john.doe@example.com",
+  "streetAddress": "123 Main St, City, State 12345"
+}
+
+### Get all users (No auth required)
+GET {{VideoGameExchange.Server_HostAddress}}/users
+Accept: application/json
+
+### Get user by ID (No auth required)
+GET {{VideoGameExchange.Server_HostAddress}}/users/{{userId}}
+Accept: application/json
+
+### Update user (REQUIRES AUTH - only own profile)
+PATCH {{VideoGameExchange.Server_HostAddress}}/users/{{userId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "John Updated",
+  "streetAddress": "456 Oak Ave, City, State 12345"
+}
+
+### Delete user (REQUIRES AUTH - only own profile)
+DELETE {{VideoGameExchange.Server_HostAddress}}/users/{{userId}}
+Authorization: Bearer {{authToken}}
+
+###
+
+### Create a new game (REQUIRES AUTH)
+POST {{VideoGameExchange.Server_HostAddress}}/games
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "The Legend of Zelda",
+  "platform": "Nintendo Switch",
+  "condition": "Excellent",
+  "year": 2017,
+  "publisher": "Nintendo",
+  "userId": "{{userId}}"
+}
+
+### Get all games (No auth required)
+GET {{VideoGameExchange.Server_HostAddress}}/games
+Accept: application/json
+
+### Get games by user ID (No auth required)
+GET {{VideoGameExchange.Server_HostAddress}}/games?userid={{userId}}
+Accept: application/json
+
+### Get game by ID (No auth required)
+GET {{VideoGameExchange.Server_HostAddress}}/games/{{gameId}}
+Accept: application/json
+
+### Update game (REQUIRES AUTH - only own game)
+PUT {{VideoGameExchange.Server_HostAddress}}/games/{{gameId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "The Legend of Zelda: Breath of the Wild",
+  "platform": "Nintendo Switch",
+  "condition": "Like New",
+  "year": 2017,
+  "publisher": "Nintendo",
+  "userId": "{{userId}}"
+}
+
+### Partial update game (REQUIRES AUTH - only own game)
+PATCH {{VideoGameExchange.Server_HostAddress}}/games/{{gameId}}
+Content-Type: application/merge-patch+json
+Authorization: Bearer {{authToken}}
+
+{
+  "condition": "Good",
+  "publisher": "Nintendo EPD"
+}
+
+### Delete game (REQUIRES AUTH - only own game)
+DELETE {{VideoGameExchange.Server_HostAddress}}/games/{{gameId}}
+Authorization: Bearer {{authToken}}
+
+###
+

@@ -1,0 +1,470 @@
+
+openapi: 3.1.1
+info:
+  title: Video Game Exchange API
+  version: 2.0.0
+  description: A RESTful API with HATEOAS (Level 3 Maturity) that lets users manage their profiles and exchange video games. Each user can create and manage their own game collection.
+  contact:
+    email: mespinosa@student.neumont.edu
+
+servers:
+  - url: https://virtserver.swaggerhub.com/neumontuniversity/VideoGameExchange/2.0.0
+    description: SwaggerHub API Auto Mocking
+  - url: http://localhost:5171
+    description: Local development server
+
+paths:
+  /users:
+    get:
+      operationId: getAllUsers
+      summary: Get all users with HATEOAS links
+      responses:
+        '200':
+          description: List of users with hypermedia links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserResource'
+                  _links:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Link'
+    post:
+      operationId: addUser
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: User created successfully
+          headers:
+            Location:
+              description: URL of the newly created user resource
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        '400':
+          description: Bad Request - Invalid input or email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /users/{userid}:
+    parameters:
+      - $ref: '#/components/parameters/userid'
+    get:
+      operationId: getUserById
+      summary: Get a specific user by ID
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    patch:
+      operationId: patchUser
+      summary: Partially update a user (email cannot be changed)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchUser'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      operationId: deleteUser
+      summary: Delete a user
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /games:
+    get:
+      operationId: getAllGames
+      summary: Get all games or filter by user ID
+      parameters:
+        - name: userid
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter games by user ID
+      responses:
+        '200':
+          description: List of games with hypermedia links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GameResource'
+                  _links:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Link'
+    post:
+      operationId: addGame
+      summary: Create a new game for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameInput'
+      responses:
+        '201':
+          description: Game added successfully
+          headers:
+            Location:
+              description: URL of the newly created game resource
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameResource'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /games/{gameid}:
+    parameters:
+      - $ref: '#/components/parameters/gameid'
+    get:
+      operationId: getGameById
+      summary: Get a specific game by ID
+      responses:
+        '200':
+          description: Game retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameResource'
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    put:
+      operationId: updateGame
+      summary: Update a game (full replacement)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameInput'
+      responses:
+        '200':
+          description: Game updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameResource'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    patch:
+      operationId: partialGameUpdate
+      summary: Partially update a game
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/PatchGame'
+      responses:
+        '200':
+          description: Game updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameResource'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      operationId: deleteGame
+      summary: Delete a game from the user's collection
+      responses:
+        '204':
+          description: Game deleted successfully
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+components:
+  parameters:
+    userid:
+      name: userid
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The ID of the user
+    gameid:
+      name: gameid
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The ID of the game
+
+  schemas:
+    Link:
+      type: object
+      description: HATEOAS hypermedia link
+      properties:
+        href:
+          type: string
+          description: The target URI
+        rel:
+          type: string
+          description: The relationship type (self, update, delete, collection, etc.)
+        method:
+          type: string
+          description: The HTTP method to use
+          default: GET
+
+    UserInput:
+      type: object
+      required: [name, password, email, streetAddress]
+      properties:
+        name:
+          type: string
+          description: User's full name
+        password:
+          type: string
+          description: User's password
+        email:
+          type: string
+          format: email
+          description: User's email address (unique, immutable after creation)
+        streetAddress:
+          type: string
+          description: User's street address
+
+    UserResource:
+      type: object
+      description: User resource with HATEOAS links
+      required: [id, name, email, streetAddress, links]
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+        name:
+          type: string
+          description: User's full name
+        email:
+          type: string
+          format: email
+          description: User's email address
+        streetAddress:
+          type: string
+          description: User's street address
+        links:
+          type: array
+          description: HATEOAS links for available actions
+          items:
+            $ref: '#/components/schemas/Link'
+
+    PatchUser:
+      type: object
+      description: Partial update for user (email is immutable and excluded)
+      properties:
+        name:
+          type:
+            - string
+            - "null"
+          description: User's full name
+        password:
+          type:
+            - string
+            - "null"
+          description: User's password
+        streetAddress:
+          type:
+            - string
+            - "null"
+          description: User's street address
+
+    GameInput:
+      type: object
+      required: [title, platform, userId]
+      properties:
+        title:
+          type: string
+          description: Name of the game
+        platform:
+          type: string
+          description: Platform (Console like Switch, Xbox, PS5, or PC)
+        condition:
+          type: string
+          description: Condition of the game (Mint, Excellent, Good, Fair, Poor)
+        year:
+          type: integer
+          format: int32
+          description: Year published
+          minimum: 1970
+          maximum: 2100
+        publisher:
+          type: string
+          description: Game publisher
+        userId:
+          type: string
+          description: ID of the user who owns this game
+
+    GameResource:
+      type: object
+      description: Game resource with HATEOAS links
+      required: [id, title, platform, userId, links]
+      properties:
+        id:
+          type: string
+          description: Unique game identifier
+        title:
+          type: string
+          description: Name of the game
+        platform:
+          type: string
+          description: Platform (Console like Switch, Xbox, PS5, or PC)
+        condition:
+          type: string
+          description: Condition of the game
+        year:
+          type: integer
+          format: int32
+          description: Year published
+        publisher:
+          type: string
+          description: Game publisher
+        userId:
+          type: string
+          description: ID of the user who owns this game
+        links:
+          type: array
+          description: HATEOAS links for available actions
+          items:
+            $ref: '#/components/schemas/Link'
+
+    PatchGame:
+      type: object
+      description: Partial update for game
+      properties:
+        title:
+          type:
+            - string
+            - "null"
+          description: Name of the game
+        platform:
+          type:
+            - string
+            - "null"
+          description: Platform (Console like Switch, Xbox, PS5, or PC)
+        condition:
+          type:
+            - string
+            - "null"
+          description: Condition of the game
+        year:
+          type:
+            - integer
+            - "null"
+          format: int32
+          description: Year published
+        publisher:
+          type:
+            - string
+            - "null"
+          description: Game publisher
+
+    Problem:
+      type: object
+      description: RFC 7807 problem details for error responses
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference that identifies the problem type
+        title:
+          type: string
+          description: A short, human-readable summary of the problem
+        status:
+          type: integer
+          format: int32
+          description: The HTTP status code
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence

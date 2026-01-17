@@ -1,0 +1,32 @@
+@Ideas_HostAddress = http://localhost:5104
+
+### Get all ideas
+GET {{Ideas_HostAddress}}/api/ideas
+Accept: application/json
+
+### Get idea by ID
+GET {{Ideas_HostAddress}}/api/ideas/1
+Accept: application/json
+
+### Create new idea
+POST {{Ideas_HostAddress}}/api/ideas
+Content-Type: application/json
+
+{
+  "title": "New Idea",
+  "description": "This is a new idea"
+}
+
+### Update idea
+PUT {{Ideas_HostAddress}}/api/ideas/1
+Content-Type: application/json
+
+{
+  "title": "Updated Idea",
+  "description": "This idea has been updated"
+}
+
+### Delete idea
+DELETE {{Ideas_HostAddress}}/api/ideas/1
+
+###

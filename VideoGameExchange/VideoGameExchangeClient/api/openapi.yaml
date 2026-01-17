@@ -1,0 +1,215 @@
+openapi: 3.1.1
+info:
+  contact:
+    email: mespinosa@student.neumont.edu
+  description: A basic API that lets users exchange video games.
+  title: Video Game Exchange API
+  version: 1.0.0
+servers:
+- description: SwaggerHub API Auto Mocking
+  url: https://virtserver.swaggerhub.com/neumontuniversity/VideoGameExchange/1.0.0
+paths:
+  /games:
+    post:
+      operationId: addGame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameInput"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+          description: Game added successfully
+          headers:
+            Location:
+              description: URL of the newly created game resource
+              explode: false
+              schema:
+                format: uri
+                type: string
+              style: simple
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Bad Request
+      summary: Create a new game to add to your user
+  /games/{gameid}:
+    delete:
+      operationId: deleteGame
+      parameters:
+      - $ref: "#/components/parameters/gameid"
+      responses:
+        "204":
+          description: Deleted game successfully
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Game not found
+      summary: Delete a game from the user's collection
+    parameters:
+    - $ref: "#/components/parameters/gameid"
+    patch:
+      operationId: partialGameUpdate
+      parameters:
+      - $ref: "#/components/parameters/gameid"
+      requestBody:
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: "#/components/schemas/PatchGame"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+          description: Game updates successful
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Game not found
+      summary: Partially update a game
+    put:
+      operationId: updateGame
+      parameters:
+      - $ref: "#/components/parameters/gameid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+          description: Game updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Game not found
+      summary: Update a game in your user's collection
+components:
+  parameters:
+    gameid:
+      description: The ID of the game
+      explode: false
+      in: path
+      name: gameid
+      required: true
+      schema:
+        type: string
+      style: simple
+  schemas:
+    GameInput:
+      example:
+        condition: condition
+        year: 1980
+        title: title
+        platform: platform
+      properties:
+        title:
+          description: Name of the game
+          type: string
+        platform:
+          description: "Platform (Console like switch, xbox, ps5, or pc)"
+          type: string
+        condition:
+          description: "Condition of the game (Mint, fair, poor)"
+          type: string
+        year:
+          description: Year published
+          format: int32
+          maximum: 2100
+          minimum: 1970
+          type: integer
+      required:
+      - platform
+      - title
+    Game:
+      allOf:
+      - $ref: "#/components/schemas/GameInput"
+      - properties:
+          id:
+            description: Unique game identifier
+            type: string
+        required:
+        - id
+      example:
+        condition: condition
+        year: 1980
+        id: id
+        title: title
+        platform: platform
+    PatchGame:
+      properties:
+        title:
+          description: Name of the game
+          nullable: true
+          type: string
+        platform:
+          description: "Platform (Console like switch, xbox, ps5, or pc)"
+          nullable: true
+          type: string
+        condition:
+          nullable: true
+          type: string
+        owner:
+          nullable: true
+          type: string
+        year:
+          description: Year published
+          format: int32
+          nullable: true
+          type: integer
+    Problem:
+      description: RFC 7807 problem details (simplified)
+      example:
+        instance: https://openapi-generator.tech
+        detail: detail
+        type: https://openapi-generator.tech
+        title: title
+        status: 6
+      properties:
+        type:
+          format: uri
+          type: string
+        title:
+          type: string
+        status:
+          format: int32
+          type: integer
+        detail:
+          type: string
+        instance:
+          format: uri
+          type: string
+
