@@ -1,0 +1,43 @@
+services:
+  api:
+    container_name: super_cool_api
+    build: ./super_cool_api
+    image: super_cool_api:latest
+    ports:
+      - "4000:3007"
+    environment:
+      - ENV=production
+      - DEBUG=false
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - db
+
+  api2:
+    container_name: super_cool_api2
+    build: ./super_cool_api
+    image: super_cool_api2:latest
+    ports:
+      - "4000:3007"
+    environment:
+      - ENV=production
+      - DEBUG=false
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - db
+    
+    web:
+      image: super_cool_web:latest
+      ports:
+        - "8080:80"
+      environment:
+        - ENV=production
+      depends_on:
+        - api
+      networks:
+        - distributed_network
+
+networks:
+  distributed_network:
+    
